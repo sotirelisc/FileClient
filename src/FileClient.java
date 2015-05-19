@@ -7,7 +7,6 @@ import java.awt.EventQueue;
 import java.awt.List;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
@@ -15,9 +14,6 @@ import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.border.EmptyBorder;
 import javax.swing.JButton;
-
-import java.io.FileNotFoundException;
-import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -33,22 +29,22 @@ public class FileClient extends JFrame {
 
     public static void main(String[] args) {
         EventQueue.invokeLater(new Runnable() {
+            
             @Override
             public void run() {
                 try {
-                    try {
-                        String name = "//localhost/FileServer";
-                        look_op = (FileInterface) Naming.lookup(name);
-                        
-                        FileClient frame = new FileClient();
-                        frame.setVisible(true);
-                    } catch (NotBoundException | MalformedURLException | RemoteException ex) {
-                        System.out.println("FileClient err: " + ex);
-                        System.exit(1);
-                    }
-                } catch (FileNotFoundException | UnsupportedEncodingException ex) {
+                    String name = "//localhost/FileServer";
+                    // Sundesh ston server
+                    look_op = (FileInterface) Naming.lookup(name);
+                    // Dhmiourgia tou GUI
+                    FileClient frame = new FileClient();
+                    frame.setVisible(true);
+                } catch (NotBoundException | MalformedURLException | RemoteException ex) {
+                    System.out.println("FileClient err: " + ex);
+                    System.exit(1);
                 }
             }
+
         });
     }
 
@@ -63,7 +59,7 @@ public class FileClient extends JFrame {
         }
     }
 
-    public FileClient() throws FileNotFoundException, UnsupportedEncodingException {
+    public FileClient() {
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setResizable(false);
         setBounds(100, 100, 895, 560);
@@ -128,7 +124,7 @@ public class FileClient extends JFrame {
             
         });
 
-		//edw pernei to arxeio me to onoma marios kai to emfanizei gia tropopoihsh
+	// Anoigei to arxeio alla epitrepei thn epeksergasia sto textarea
         btnEditFile.addActionListener(new ActionListener() {
             
             @Override
@@ -165,6 +161,7 @@ public class FileClient extends JFrame {
             public void actionPerformed(ActionEvent e) {
                 try {
                     textArea_1.setText(look_op.viewFile(list.getSelectedItem()));
+                    // Den epitrepetai h epeksergasia
                     textArea_1.setEditable(false);
                 } catch (RemoteException ex) {
                     Logger.getLogger(FileClient.class.getName()).log(Level.SEVERE, null, ex);
@@ -179,22 +176,27 @@ public class FileClient extends JFrame {
             @Override
             public void actionPerformed(ActionEvent e) {
                 try {
-                    if (mode.equals("create")) {
-                        if (!textArea_1.getText().equals("")) {
-                            try {
-                                do {
-                                    filename = JOptionPane.showInputDialog(null, "Save as:");
-                                    // Elegxos gia to an uparxei hdh to arxeio kai an to onoma pou dwthike einai keno
-                                } while (look_op.exists(filename+".txt") || filename.isEmpty());
-                                // Dhmiourgia arxeiou ston server
-                                look_op.createFile(filename+".txt", textArea_1.getText());
-                            } catch (RemoteException ex) {
-                                Logger.getLogger(FileClient.class.getName()).log(Level.SEVERE, null, ex);
-                            }
-                        }
-                    } else if (mode.equals("edit")) {
-                        look_op.editFile(to_edit, textArea_1.getText());
+                    switch (mode) {
+                        // Apothikeush kata th dhmiourgia arxeiou
+                        case "create":
+                            if (!textArea_1.getText().equals("")) {
+                                try {
+                                    do {
+                                        filename = JOptionPane.showInputDialog(null, "Save as:");
+                                        // Elegxos gia to an uparxei hdh to arxeio kai an to onoma pou dwthike einai keno
+                                    } while (look_op.exists(filename+".txt") || filename.isEmpty());
+                                    // Dhmiourgia arxeiou ston server
+                                    look_op.createFile(filename+".txt", textArea_1.getText());
+                                } catch (RemoteException ex) {
+                                    Logger.getLogger(FileClient.class.getName()).log(Level.SEVERE, null, ex);
+                                }
+                            }   break;
+                        // Apothikeush kata thn epeksergasia arxeiou
+                        case "edit":
+                            look_op.editFile(to_edit, textArea_1.getText());
+                            break;
                     }
+                    // Epanafora buttons kai forms
                     textArea_1.setText("");
                     textArea_1.setEditable(false);
                     btnSaveFile.setEnabled(false);
@@ -212,6 +214,5 @@ public class FileClient extends JFrame {
             }
             
         });
-
     }
 }
